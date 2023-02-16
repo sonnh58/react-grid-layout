@@ -1,5 +1,6 @@
 // @flow
 import * as React from "react";
+import * as ReactDom from "react-dom";
 
 import isEqual from "lodash.isequal";
 import clsx from "clsx";
@@ -121,12 +122,12 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   state: State = {
     activeDrag: null,
     layout: synchronizeLayoutWithChildren(
-      this.props.layout,
-      this.props.children,
-      this.props.cols,
-      // Legacy support for verticalCompact: false
-      compactType(this.props),
-      this.props.allowOverlap
+        this.props.layout,
+        this.props.children,
+        this.props.cols,
+        // Legacy support for verticalCompact: false
+        compactType(this.props),
+        this.props.allowOverlap
     ),
     mounted: false,
     oldDragItem: null,
@@ -146,8 +147,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   }
 
   static getDerivedStateFromProps(
-    nextProps: Props,
-    prevState: State
+      nextProps: Props,
+      prevState: State
   ): $Shape<State> | null {
     let newLayoutBase;
 
@@ -158,8 +159,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     // Legacy support for compactType
     // Allow parent to set layout directly.
     if (
-      !isEqual(nextProps.layout, prevState.propsLayout) ||
-      nextProps.compactType !== prevState.compactType
+        !isEqual(nextProps.layout, prevState.propsLayout) ||
+        nextProps.compactType !== prevState.compactType
     ) {
       newLayoutBase = nextProps.layout;
     } else if (!childrenEqual(nextProps.children, prevState.children)) {
@@ -172,11 +173,11 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     // We need to regenerate the layout.
     if (newLayoutBase) {
       const newLayout = synchronizeLayoutWithChildren(
-        newLayoutBase,
-        nextProps.children,
-        nextProps.cols,
-        compactType(nextProps),
-        nextProps.allowOverlap
+          newLayoutBase,
+          nextProps.children,
+          nextProps.cols,
+          compactType(nextProps),
+          nextProps.allowOverlap
       );
 
       return {
@@ -194,14 +195,14 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
   shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
     return (
-      // NOTE: this is almost always unequal. Therefore the only way to get better performance
-      // from SCU is if the user intentionally memoizes children. If they do, and they can
-      // handle changes properly, performance will increase.
-      this.props.children !== nextProps.children ||
-      !fastRGLPropsEqual(this.props, nextProps, isEqual) ||
-      this.state.activeDrag !== nextState.activeDrag ||
-      this.state.mounted !== nextState.mounted ||
-      this.state.droppingPosition !== nextState.droppingPosition
+        // NOTE: this is almost always unequal. Therefore the only way to get better performance
+        // from SCU is if the user intentionally memoizes children. If they do, and they can
+        // handle changes properly, performance will increase.
+        this.props.children !== nextProps.children ||
+        !fastRGLPropsEqual(this.props, nextProps, isEqual) ||
+        this.state.activeDrag !== nextState.activeDrag ||
+        this.state.mounted !== nextState.mounted ||
+        this.state.droppingPosition !== nextState.droppingPosition
     );
   }
 
@@ -222,13 +223,13 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     if (!this.props.autoSize) return;
     const nbRow = bottom(this.state.layout);
     const containerPaddingY = this.props.containerPadding
-      ? this.props.containerPadding[1]
-      : this.props.margin[1];
+        ? this.props.containerPadding[1]
+        : this.props.margin[1];
     return (
-      nbRow * this.props.rowHeight +
-      (nbRow - 1) * this.props.margin[1] +
-      containerPaddingY * 2 +
-      "px"
+        nbRow * this.props.rowHeight +
+        (nbRow - 1) * this.props.margin[1] +
+        containerPaddingY * 2 +
+        "px"
     );
   }
 
@@ -241,10 +242,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
    * @param {Element} node The current dragging DOM element
    */
   onDragStart: (i: string, x: number, y: number, GridDragEvent) => void = (
-    i: string,
-    x: number,
-    y: number,
-    { e, node }: GridDragEvent
+      i: string,
+      x: number,
+      y: number,
+      { e, node }: GridDragEvent
   ) => {
     const { layout } = this.state;
     const l = getLayoutItem(layout, i);
@@ -267,10 +268,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
    * @param {Element} node The current dragging DOM element
    */
   onDrag: (i: string, x: number, y: number, GridDragEvent) => void = (
-    i,
-    x,
-    y,
-    { e, node }
+      i,
+      x,
+      y,
+      { e, node }
   ) => {
     const { oldDragItem } = this.state;
     let { layout } = this.state;
@@ -291,24 +292,26 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     // Move the element to the dragged location.
     const isUserAction = true;
     layout = moveElement(
-      layout,
-      l,
-      x,
-      y,
-      isUserAction,
-      preventCollision,
-      compactType(this.props),
-      cols,
-      allowOverlap
+        layout,
+        l,
+        x,
+        y,
+        isUserAction,
+        preventCollision,
+        compactType(this.props),
+        cols,
+        allowOverlap
     );
 
     this.props.onDrag(layout, oldDragItem, l, placeholder, e, node);
 
-    this.setState({
-      layout: allowOverlap
-        ? layout
-        : compact(layout, compactType(this.props), cols),
-      activeDrag: placeholder
+    ReactDom.flushSync(() => {
+      this.setState({
+        layout: allowOverlap
+            ? layout
+            : compact(layout, compactType(this.props), cols),
+        activeDrag: placeholder
+      });
     });
   };
 
@@ -321,10 +324,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
    * @param {Element} node The current dragging DOM element
    */
   onDragStop: (i: string, x: number, y: number, GridDragEvent) => void = (
-    i,
-    x,
-    y,
-    { e, node }
+      i,
+      x,
+      y,
+      { e, node }
   ) => {
     if (!this.state.activeDrag) return;
 
@@ -337,23 +340,23 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     // Move the element here
     const isUserAction = true;
     layout = moveElement(
-      layout,
-      l,
-      x,
-      y,
-      isUserAction,
-      preventCollision,
-      compactType(this.props),
-      cols,
-      allowOverlap
+        layout,
+        l,
+        x,
+        y,
+        isUserAction,
+        preventCollision,
+        compactType(this.props),
+        cols,
+        allowOverlap
     );
 
     this.props.onDragStop(layout, oldDragItem, l, null, e, node);
 
     // Set state
     const newLayout = allowOverlap
-      ? layout
-      : compact(layout, compactType(this.props), cols);
+        ? layout
+        : compact(layout, compactType(this.props), cols);
     const { oldLayout } = this.state;
     this.setState({
       activeDrag: null,
@@ -374,10 +377,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   }
 
   onResizeStart: (i: string, w: number, h: number, GridResizeEvent) => void = (
-    i,
-    w,
-    h,
-    { e, node }
+      i,
+      w,
+      h,
+      { e, node }
   ) => {
     const { layout } = this.state;
     const l = getLayoutItem(layout, i);
@@ -392,10 +395,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   };
 
   onResize: (i: string, w: number, h: number, GridResizeEvent) => void = (
-    i,
-    w,
-    h,
-    { e, node }
+      i,
+      w,
+      h,
+      { e, node }
   ) => {
     const { layout, oldResizeItem } = this.state;
     const { cols, preventCollision, allowOverlap } = this.props;
@@ -406,7 +409,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       let hasCollisions;
       if (preventCollision && !allowOverlap) {
         const collisions = getAllCollisions(layout, { ...l, w, h }).filter(
-          layoutItem => layoutItem.i !== l.i
+            layoutItem => layoutItem.i !== l.i
         );
         hasCollisions = collisions.length > 0;
 
@@ -414,7 +417,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         if (hasCollisions) {
           // adjust w && h to maximum allowed space
           let leastX = Infinity,
-            leastY = Infinity;
+              leastY = Infinity;
           collisions.forEach(layoutItem => {
             if (layoutItem.x > l.x) leastX = Math.min(leastX, layoutItem.x);
             if (layoutItem.y > l.y) leastY = Math.min(leastY, layoutItem.y);
@@ -450,19 +453,22 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     this.props.onResize(newLayout, oldResizeItem, l, placeholder, e, node);
 
     // Re-compact the newLayout and set the drag placeholder.
-    this.setState({
-      layout: allowOverlap
-        ? newLayout
-        : compact(newLayout, compactType(this.props), cols),
-      activeDrag: placeholder
+    ReactDom.flushSync(() => {
+      this.setState({
+        layout: allowOverlap
+            ? newLayout
+            : compact(newLayout, compactType(this.props), cols),
+        activeDrag: placeholder
+      });
     });
+    console.log('apply sonnh aaaaaaaaaaaaaaaaaaa')
   };
 
   onResizeStop: (i: string, w: number, h: number, GridResizeEvent) => void = (
-    i,
-    w,
-    h,
-    { e, node }
+      i,
+      w,
+      h,
+      { e, node }
   ) => {
     const { layout, oldResizeItem } = this.state;
     const { cols, allowOverlap } = this.props;
@@ -472,8 +478,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
     // Set state
     const newLayout = allowOverlap
-      ? layout
-      : compact(layout, compactType(this.props), cols);
+        ? layout
+        : compact(layout, compactType(this.props), cols);
     const { oldLayout } = this.state;
     this.setState({
       activeDrag: null,
@@ -505,27 +511,27 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
     // {...this.state.activeDrag} is pretty slow, actually
     return (
-      <GridItem
-        w={activeDrag.w}
-        h={activeDrag.h}
-        x={activeDrag.x}
-        y={activeDrag.y}
-        i={activeDrag.i}
-        className="react-grid-placeholder"
-        containerWidth={width}
-        cols={cols}
-        margin={margin}
-        containerPadding={containerPadding || margin}
-        maxRows={maxRows}
-        rowHeight={rowHeight}
-        isDraggable={false}
-        isResizable={false}
-        isBounded={false}
-        useCSSTransforms={useCSSTransforms}
-        transformScale={transformScale}
-      >
-        <div />
-      </GridItem>
+        <GridItem
+            w={activeDrag.w}
+            h={activeDrag.h}
+            x={activeDrag.x}
+            y={activeDrag.y}
+            i={activeDrag.i}
+            className="react-grid-placeholder"
+            containerWidth={width}
+            cols={cols}
+            margin={margin}
+            containerPadding={containerPadding || margin}
+            maxRows={maxRows}
+            rowHeight={rowHeight}
+            isDraggable={false}
+            isResizable={false}
+            isBounded={false}
+            useCSSTransforms={useCSSTransforms}
+            transformScale={transformScale}
+        >
+          <div />
+        </GridItem>
     );
   }
 
@@ -535,8 +541,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
    * @return {Element}       Element wrapped in draggable and properly placed.
    */
   processGridItem(
-    child: ReactElement<any>,
-    isDroppingItem?: boolean
+      child: ReactElement<any>,
+      isDroppingItem?: boolean
   ): ?ReactElement<any> {
     if (!child || !child.key) return;
     const l = getLayoutItem(this.state.layout, String(child.key));
@@ -564,56 +570,56 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     // If an item is static, it can't be manipulated by default.
     // Any properties defined directly on the grid item will take precedence.
     const draggable =
-      typeof l.isDraggable === "boolean"
-        ? l.isDraggable
-        : !l.static && isDraggable;
+        typeof l.isDraggable === "boolean"
+            ? l.isDraggable
+            : !l.static && isDraggable;
     const resizable =
-      typeof l.isResizable === "boolean"
-        ? l.isResizable
-        : !l.static && isResizable;
+        typeof l.isResizable === "boolean"
+            ? l.isResizable
+            : !l.static && isResizable;
     const resizeHandlesOptions = l.resizeHandles || resizeHandles;
 
     // isBounded set on child if set on parent, and child is not explicitly false
     const bounded = draggable && isBounded && l.isBounded !== false;
 
     return (
-      <GridItem
-        containerWidth={width}
-        cols={cols}
-        margin={margin}
-        containerPadding={containerPadding || margin}
-        maxRows={maxRows}
-        rowHeight={rowHeight}
-        cancel={draggableCancel}
-        handle={draggableHandle}
-        onDragStop={this.onDragStop}
-        onDragStart={this.onDragStart}
-        onDrag={this.onDrag}
-        onResizeStart={this.onResizeStart}
-        onResize={this.onResize}
-        onResizeStop={this.onResizeStop}
-        isDraggable={draggable}
-        isResizable={resizable}
-        isBounded={bounded}
-        useCSSTransforms={useCSSTransforms && mounted}
-        usePercentages={!mounted}
-        transformScale={transformScale}
-        w={l.w}
-        h={l.h}
-        x={l.x}
-        y={l.y}
-        i={l.i}
-        minH={l.minH}
-        minW={l.minW}
-        maxH={l.maxH}
-        maxW={l.maxW}
-        static={l.static}
-        droppingPosition={isDroppingItem ? droppingPosition : undefined}
-        resizeHandles={resizeHandlesOptions}
-        resizeHandle={resizeHandle}
-      >
-        {child}
-      </GridItem>
+        <GridItem
+            containerWidth={width}
+            cols={cols}
+            margin={margin}
+            containerPadding={containerPadding || margin}
+            maxRows={maxRows}
+            rowHeight={rowHeight}
+            cancel={draggableCancel}
+            handle={draggableHandle}
+            onDragStop={this.onDragStop}
+            onDragStart={this.onDragStart}
+            onDrag={this.onDrag}
+            onResizeStart={this.onResizeStart}
+            onResize={this.onResize}
+            onResizeStop={this.onResizeStop}
+            isDraggable={draggable}
+            isResizable={resizable}
+            isBounded={bounded}
+            useCSSTransforms={useCSSTransforms && mounted}
+            usePercentages={!mounted}
+            transformScale={transformScale}
+            w={l.w}
+            h={l.h}
+            x={l.x}
+            y={l.y}
+            i={l.i}
+            minH={l.minH}
+            minW={l.minW}
+            maxH={l.maxH}
+            maxW={l.maxW}
+            static={l.static}
+            droppingPosition={isDroppingItem ? droppingPosition : undefined}
+            resizeHandles={resizeHandlesOptions}
+            resizeHandle={resizeHandle}
+        >
+          {child}
+        </GridItem>
     );
   }
 
@@ -627,9 +633,9 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     // to avoid unpredictable jumping of a dropping placeholder
     // FIXME remove this hack
     if (
-      isFirefox &&
-      // $FlowIgnore can't figure this out
-      !e.nativeEvent.target?.classList.contains(layoutClassName)
+        isFirefox &&
+        // $FlowIgnore can't figure this out
+        !e.nativeEvent.target?.classList.contains(layoutClassName)
     ) {
       return false;
     }
@@ -676,11 +682,11 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       };
 
       const calculatedPosition = calcXY(
-        positionParams,
-        layerY,
-        layerX,
-        finalDroppingItem.w,
-        finalDroppingItem.h
+          positionParams,
+          layerY,
+          layerX,
+          finalDroppingItem.w,
+          finalDroppingItem.h
       );
 
       this.setState({
@@ -711,9 +717,9 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     const { layout } = this.state;
 
     const newLayout = compact(
-      layout.filter(l => l.i !== droppingItem.i),
-      compactType(this.props),
-      cols
+        layout.filter(l => l.i !== droppingItem.i),
+        compactType(this.props),
+        cols
     );
 
     this.setState({
@@ -770,23 +776,23 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     };
 
     return (
-      <div
-        ref={innerRef}
-        className={mergedClassName}
-        style={mergedStyle}
-        onDrop={isDroppable ? this.onDrop : noop}
-        onDragLeave={isDroppable ? this.onDragLeave : noop}
-        onDragEnter={isDroppable ? this.onDragEnter : noop}
-        onDragOver={isDroppable ? this.onDragOver : noop}
-      >
-        {React.Children.map(this.props.children, child =>
-          this.processGridItem(child)
-        )}
-        {isDroppable &&
-          this.state.droppingDOMNode &&
-          this.processGridItem(this.state.droppingDOMNode, true)}
-        {this.placeholder()}
-      </div>
+        <div
+            ref={innerRef}
+            className={mergedClassName}
+            style={mergedStyle}
+            onDrop={isDroppable ? this.onDrop : noop}
+            onDragLeave={isDroppable ? this.onDragLeave : noop}
+            onDragEnter={isDroppable ? this.onDragEnter : noop}
+            onDragOver={isDroppable ? this.onDragOver : noop}
+        >
+          {React.Children.map(this.props.children, child =>
+              this.processGridItem(child)
+          )}
+          {isDroppable &&
+              this.state.droppingDOMNode &&
+              this.processGridItem(this.state.droppingDOMNode, true)}
+          {this.placeholder()}
+        </div>
     );
   }
 }
