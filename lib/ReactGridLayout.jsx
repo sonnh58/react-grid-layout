@@ -102,6 +102,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     verticalCompact: true,
     compactType: "vertical",
     preventCollision: false,
+    ignoreClickOnly: false,
     droppingItem: {
       i: "__dropping-elem__",
       h: 1,
@@ -339,6 +340,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       y,
       { e, node }
   ) => {
+    // Shouldn't happen as `onDrag` fires immediately after `onDragStart`
     if (!this.state.activeDrag) return;
 
     const { oldDragItem } = this.state;
@@ -471,7 +473,6 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         activeDrag: placeholder
       });
     });
-    console.log('apply sonnh aaaaaaaaaaaaaaaaaaa')
   };
 
   onResizeStop: (i: string, w: number, h: number, GridResizeEvent) => void = (
@@ -567,6 +568,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       isDraggable,
       isResizable,
       isBounded,
+      ignoreClickOnly,
       useCSSTransforms,
       transformScale,
       draggableCancel,
@@ -613,6 +615,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
             isBounded={bounded}
             useCSSTransforms={useCSSTransforms && mounted}
             usePercentages={!mounted}
+            ignoreClickOnly={ignoreClickOnly}
             transformScale={transformScale}
             w={l.w}
             h={l.h}
