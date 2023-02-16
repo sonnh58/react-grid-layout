@@ -14,7 +14,7 @@ import {
   clamp
 } from "./calculateUtils";
 import {
-  resizeHandlesType,
+  resizeHandleAxesType,
   resizeHandleType
 } from "./ReactGridLayoutPropTypes";
 import clsx from "clsx";
@@ -29,7 +29,7 @@ import type {
 } from "./utils";
 
 import type { PositionParams } from "./calculateUtils";
-import type { ResizeHandles, ResizeHandle } from "./ReactGridLayoutPropTypes";
+import type { ResizeHandleAxis, ResizeHandle } from "./ReactGridLayoutPropTypes";
 
 type PartialPosition = { top: number, left: number };
 type GridItemCallback<Data: GridDragEvent | GridResizeEvent> = (
@@ -80,7 +80,7 @@ type Props = {
   maxH: number,
   i: string,
 
-  resizeHandles?: ResizeHandles,
+  resizeHandles?: ResizeHandleAxis[],
   resizeHandle?: ResizeHandle,
 
   onDrag?: GridItemCallback<GridDragEvent>,
@@ -157,7 +157,7 @@ export default class GridItem extends React.Component<Props, State> {
     i: PropTypes.string.isRequired,
 
     // Resize handle options
-    resizeHandles: resizeHandlesType,
+    resizeHandles: resizeHandleAxesType,
     resizeHandle: resizeHandleType,
 
     // Functions
