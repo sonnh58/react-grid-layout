@@ -207,6 +207,16 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props, prevState: State) {
+    if (this.state.activeDrag) {
+      const children = this.props.children || [];
+      const draggingKey = this.state.activeDrag.i;
+      if (!children.find(child => child.key === draggingKey)) {
+        // the item we're dragging around has been removed from children,
+        //  so we need to clean up our state and forget about it
+        this.removeDroppingPlaceholder()
+      }
+    }
+
     if (!this.state.activeDrag) {
       const newLayout = this.state.layout;
       const oldLayout = prevState.layout;
